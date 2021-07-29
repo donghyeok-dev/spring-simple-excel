@@ -19,7 +19,7 @@ class SimpleExcelTest {
         ClassPathResource resource = new ClassPathResource("excel/sample_upload_file.xlsx");
 
         // when
-        List<SampleDto> results = simpleExcel.readExcel(SampleDto.class, resource.getInputStream());
+        List<SampleDto> results = simpleExcel.readExcelFromInputStream(SampleDto.class, resource.getInputStream());
 
         // then
         assertEquals(4, results.size());

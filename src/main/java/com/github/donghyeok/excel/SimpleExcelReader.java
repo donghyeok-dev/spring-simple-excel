@@ -1,7 +1,7 @@
 package com.github.donghyeok.excel;
 
 import com.github.donghyeok.excel.annotation.ExcelColumn;
-import com.github.donghyeok.excel.exception.ExcelReaderFileException;
+import com.github.donghyeok.excel.exception.ExcelReaderException;
 import com.github.drapostolos.typeparser.TypeParser;
 import org.apache.poi.ss.formula.eval.ErrorEval;
 import org.apache.poi.ss.usermodel.*;
@@ -22,7 +22,7 @@ class SimpleExcelReader<T> {
         typeParser = TypeParser.newBuilder().build();
     }
 
-    public List<T> convertInStreamToList(InputStream inputStream) {
+    public List<T> convertInStreamToList(final InputStream inputStream) {
         Map<String, Integer> headerNameMap = new HashMap<>();
         Map<Integer, Field> headerIndexMap = new HashMap<>();
         List<T> resultList = new ArrayList<>();
@@ -54,7 +54,7 @@ class SimpleExcelReader<T> {
             });
 
         } catch (Exception e) {
-            throw new ExcelReaderFileException(e.getMessage(), e);
+            throw new ExcelReaderException(e.getMessage(), e);
         }
 
         return resultList;
@@ -100,7 +100,7 @@ class SimpleExcelReader<T> {
             field.setAccessible(true);
             field.set(object, typeParser.parseType(getValue(cell), field.getType()));
         } catch (IllegalAccessException e) {
-            throw new ExcelReaderFileException(e.getMessage(), e);
+            throw new ExcelReaderException(e.getMessage(), e);
         }
     }
 }
