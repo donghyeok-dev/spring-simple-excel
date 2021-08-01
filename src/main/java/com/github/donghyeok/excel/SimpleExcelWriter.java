@@ -21,8 +21,7 @@ class SimpleExcelWriter<T> {
     protected final Class<T> tClass;
     protected final TypeParser typeParser;
     Comparator<Integer> comparator;
-    Map<Integer, Field> headerOrderMap;
-    List<String> headerNames;
+    Map<Integer, SimpleExcelColumn> headerOrderMap;
     SXSSFWorkbook workbook;
     int rowIdx;
     int colIdx;
@@ -34,7 +33,6 @@ class SimpleExcelWriter<T> {
         this.workbook.setCompressTempFiles(true);
         this.comparator = Integer::compareTo; // 오름차순, 내림차순: comparator = (s1, s2)->s2.compareTo(s1);
         this.headerOrderMap = new TreeMap<>(comparator);
-        this.headerNames = new ArrayList<>();
         this.rowIdx = 0;
         this.colIdx = 0;
 
@@ -42,8 +40,10 @@ class SimpleExcelWriter<T> {
             final ExcelColumn excelColumn = f.getAnnotation(ExcelColumn.class);
             if(excelColumn != null) {
                 ReflectionUtils.makeAccessible(f);
-                this.headerNames.add(excelColumn.headerName());
-                this.headerOrderMap.put(excelColumn.headerOrder(), f);
+                this.headerOrderMap.put(excelColumn.headerOrder(), SimpleExcelColumn.builder()
+                        .field(f)
+                        .excelColumn(excelColumn)
+                        .build());
             }
         });
     }
@@ -54,7 +54,17 @@ class SimpleExcelWriter<T> {
         font.setFontHeightInPoints((short)12);
         font.setBold(true);
 
-        return getCellStyle(font);
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setBorderBottom(BorderStyle.THIN);
+        cellStyle.setBorderLeft(BorderStyle.THIN);
+        cellStyle.setBorderRight(BorderStyle.THIN);
+        cellStyle.setBorderTop(BorderStyle.THIN);
+        cellStyle.setFont(font);
+        cellStyle.setAlignment(HorizontalAlignment.CENTER);
+        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        cellStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        return cellStyle;
     }
 
     public void setHeader(SXSSFSheet sheet) {
@@ -62,35 +72,29 @@ class SimpleExcelWriter<T> {
         headerRow.setHeight((short)500);
         CellStyle headerCellStyle = setHeaderStyle();
 
-        for(int idx = this.colIdx; idx < headerNames.size(); idx++) {
-            Cell cell = headerRow.createCell(idx);
-            cell.setCellValue(headerNames.get(idx));
+        int startIdx = this.colIdx;
+        for(Map.Entry<Integer, SimpleExcelColumn> el : headerOrderMap.entrySet()) {
+            Cell cell = headerRow.createCell(startIdx++);
+            cell.setCellValue(el.getValue().getExcelColumn().headerName());
             cell.setCellStyle(headerCellStyle);
         }
     }
 
-    public CellStyle setBodyStyle() {
+    public CellStyle setBodyStyle(SimpleExcelColumn excelColumn) {
         Font font = this.workbook.createFont();
         font.setFontName(HSSFFont.FONT_ARIAL);
         font.setFontHeightInPoints((short)10);
         font.setBold(false);
 
-        return getCellStyle(font);
-    }
-
-    private CellStyle getCellStyle(Font font) {
-        CellStyle bodyCellStyle = workbook.createCellStyle();
-        bodyCellStyle.setBorderBottom(BorderStyle.THIN);
-        bodyCellStyle.setBorderLeft(BorderStyle.THIN);
-        bodyCellStyle.setBorderRight(BorderStyle.THIN);
-        bodyCellStyle.setBorderTop(BorderStyle.THIN);
-        bodyCellStyle.setFont(font);
-        bodyCellStyle.setAlignment(HorizontalAlignment.CENTER);
-        bodyCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        bodyCellStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-        bodyCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-        return bodyCellStyle;
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setBorderBottom(BorderStyle.THIN);
+        cellStyle.setBorderLeft(BorderStyle.THIN);
+        cellStyle.setBorderRight(BorderStyle.THIN);
+        cellStyle.setBorderTop(BorderStyle.THIN);
+        cellStyle.setFont(font);
+        cellStyle.setAlignment(excelColumn.getExcelColumn().alignment());
+        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        return cellStyle;
     }
 
     public void addRow(SXSSFSheet sheet, T object) {
@@ -98,13 +102,15 @@ class SimpleExcelWriter<T> {
             Row row = sheet.createRow(this.rowIdx++);
             int idx = this.colIdx;
             row.setHeight((short)500);
-            CellStyle bodyCellStyle = setBodyStyle();
 
-            for(Map.Entry<Integer, Field> el : headerOrderMap.entrySet()) {
-                Cell cell = row.createCell(idx++);
-                cell.setCellStyle(bodyCellStyle);
-                Field field = el.getValue();
+            for(Map.Entry<Integer, SimpleExcelColumn> el : headerOrderMap.entrySet()) {
+                SimpleExcelColumn excelColumn = el.getValue();
+                Field field = excelColumn.getField();
                 Object value = field.get(object);
+                sheet.setColumnWidth(idx, excelColumn.getExcelColumn().width());
+                Cell cell = row.createCell(idx++);
+
+                cell.setCellStyle(setBodyStyle(excelColumn));
 
                 if(value == null) {
                     cell.setCellValue((String) null);
