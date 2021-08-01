@@ -12,6 +12,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExcelColumn {
     String headerName() default "";
+    int headerOrder() default 1;
     ExcelDataType type() default ExcelDataType.STRING;
     ExcelDataAlignment alignment() default ExcelDataAlignment.CENTER;
     int width() default 4096;

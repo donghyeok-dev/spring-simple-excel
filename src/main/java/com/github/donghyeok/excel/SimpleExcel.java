@@ -20,7 +20,7 @@ import java.util.List;
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 public class SimpleExcel {
-    SimpleExcelFactory excelFactory;
+    private final SimpleExcelFactory excelFactory;
 
     public SimpleExcel() {
         this.excelFactory = new SimpleExcelFactory();

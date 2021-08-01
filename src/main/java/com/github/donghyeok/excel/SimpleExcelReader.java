@@ -19,7 +19,7 @@ class SimpleExcelReader<T> {
 
     public SimpleExcelReader(Class<T> tClass) {
         this.tClass = tClass;
-        typeParser = TypeParser.newBuilder().build();
+        this.typeParser = TypeParser.newBuilder().build();
     }
 
     public List<T> convertInStreamToList(final InputStream inputStream) {
