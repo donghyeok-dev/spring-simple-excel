@@ -20,7 +20,7 @@ import java.util.List;
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 public class SimpleExcel {
-    SimpleExcelFactory excelFactory;
+    private final SimpleExcelFactory excelFactory;
 
     public SimpleExcel() {
         this.excelFactory = new SimpleExcelFactory();
@@ -32,18 +32,21 @@ public class SimpleExcel {
     public <T> List<T> readExcelFromMultipartFile(final Class<T> tClass, final MultipartFile multipartFile) throws IOException {
         return excelFactory.createExcelReader(tClass).convertInStreamToList(multipartFile.getInputStream());
     }
+
     /**
      InputStream의 엑셀 파일을 읽어서 지정된 Type으로 변환하여 반환한다.
      */
     public <T> List<T> readExcelFromInputStream(final Class<T> tClass, final InputStream inputStream) {
         return excelFactory.createExcelReader(tClass).convertInStreamToList(inputStream);
     }
+
     /**
      지정된 Type의 객체를 엑셀 파일로 변환하여 반환한다.
      */
     public <T> SXSSFWorkbook writeObjectsToWorkbook(final Class<T> tClass, final List<T> objects, final String sheetName) {
         return excelFactory.createExcelWriter(tClass).writeObjectsToWorkbook(objects, sheetName);
     }
+
     /**
      지정된 Type의 객체를 엑셀 파일로 변환하고 response로 파일을 내려준다.
      */
