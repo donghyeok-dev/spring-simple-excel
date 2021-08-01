@@ -10,13 +10,13 @@ import lombok.*;
 public class SampleDto {
     @ExcelColumn(headerName = "번호", headerOrder = 1)
     Integer no;
-    @ExcelColumn(headerName = "업체명", headerOrder = 4)
+    @ExcelColumn(headerName = "업체명", headerOrder = 4, width = 9000)
     String companyName;
     @ExcelColumn(headerName = "대표자명", headerOrder = 5)
     String ceoName;
-    @ExcelColumn(headerName = "이메일", headerOrder = 2)
+    @ExcelColumn(headerName = "이메일", headerOrder = 2, width = 9000)
     String email;
-    @ExcelColumn(headerName = "연락처", headerOrder = 3)
+    @ExcelColumn(headerName = "연락처", headerOrder = 3, width = 9000)
     String phone;
     String address;
     String remark;

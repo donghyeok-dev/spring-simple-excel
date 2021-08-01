@@ -1,7 +1,7 @@
 package com.github.donghyeok.excel.annotation;
 
-import com.github.donghyeok.excel.enums.ExcelDataAlignment;
 import com.github.donghyeok.excel.enums.ExcelDataType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -14,6 +14,6 @@ public @interface ExcelColumn {
     String headerName() default "";
     int headerOrder() default 1;
     ExcelDataType type() default ExcelDataType.STRING;
-    ExcelDataAlignment alignment() default ExcelDataAlignment.CENTER;
+    HorizontalAlignment alignment() default HorizontalAlignment.CENTER;
     int width() default 4096;
 }
