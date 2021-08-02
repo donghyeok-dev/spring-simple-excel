@@ -1,6 +1,7 @@
 package com.github.donghyeok.excel;
 
 import com.github.donghyeok.excel.annotation.SimpleExcelColumn;
+import com.github.donghyeok.excel.exception.ExcelWriterException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,6 +24,8 @@ public class SimpleExcelColumnCreator {
     private Font headerFont;
     private CellStyle bodyCellStyle;
     private Font bodyFont;
+    private Object sum;
+    private Calculation addition;
 
     @Builder
     public SimpleExcelColumnCreator(SXSSFWorkbook workbook, Field field, SimpleExcelColumn simpleExcelColumn) {
@@ -35,6 +38,17 @@ public class SimpleExcelColumnCreator {
 
         setHeaderStyle();
         setBodyStyle();
+
+        if(Integer.class.equals(this.field.getType()) || int.class.equals(this.field.getType()) ) {
+            this.sum = 0;
+            addition = (Calculation<Integer>) Integer::sum;
+        }else if(Double.class.equals(this.field.getType()) || double.class.equals(this.field.getType()) ) {
+            this.sum = 0.0;
+            addition = (Calculation<Double>) Double::sum;
+        }else if(Float.class.equals(this.field.getType()) || float.class.equals(this.field.getType()) ) {
+            this.sum = 0f;
+            addition = (Calculation<Float>) Float::sum;
+        }
     }
 
     protected void setHeaderStyle() {
@@ -74,8 +88,45 @@ public class SimpleExcelColumnCreator {
         cell.setCellStyle(headerCellStyle);
     }
 
-    public Cell createBodyCell(Cell cell) {
-        cell.setCellStyle(bodyCellStyle);
-        return cell;
+    protected boolean isNumberic(Class<?> tClass) {
+        return (Integer.class.equals(tClass)
+                || int.class.equals(tClass)
+                || Double.class.equals(tClass)
+                || double.class.equals(tClass)
+                || Float.class.equals(tClass)
+                || float.class.equals(tClass));
     }
+
+    public void createBodyCell(Cell cell, Object value) {
+        cell.setCellStyle(bodyCellStyle);
+
+        if(simpleExcelColumn.includeFooterSum()) {
+            if(!isNumberic(this.field.getType())) {
+                System.out.println(this.getSimpleExcelColumn().headerName() + " " + this.field.getType());
+                throw new ExcelWriterException("foot sum 컬럼은 숫자형타입만 가능합니다.");
+            }
+            this.sum = this.addition.apply(value, this.sum);
+        }
+
+        if(value == null) {
+            cell.setCellValue((String) null);
+        }else if(String.class.equals(field.getType())) {
+            cell.setCellValue(value.toString());
+        }else if(Integer.class.equals(field.getType()) || int.class.equals(field.getType())) {
+            cell.setCellValue((Integer) value);
+        }else if(Double.class.equals(field.getType()) || double.class.equals(field.getType())) {
+            cell.setCellValue((Double) value);
+        }else if(Float.class.equals(field.getType()) || float.class.equals(field.getType())) {
+            cell.setCellValue((Float) value);
+        } else if(Date.class.equals(field.getType())) {
+            cell.setCellValue((Date) value);
+        }else if(LocalDateTime.class.equals(field.getType()) || OffsetDateTime.class.equals(field.getType())) {
+            cell.setCellValue((LocalDateTime) value);
+        }
+    }
+}
+
+@FunctionalInterface
+interface Calculation<T> {
+    T apply(T x, T y);
 }

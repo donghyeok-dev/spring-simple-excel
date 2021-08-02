@@ -39,6 +39,7 @@ class SimpleExcelWriter<T> {
         ReflectionUtils.doWithFields(SampleDto.class, f -> {
             final SimpleExcelColumn simpleExcelColumn = f.getAnnotation(SimpleExcelColumn.class);
             if(simpleExcelColumn != null) {
+
                 ReflectionUtils.makeAccessible(f);
                 this.columnOrderMap.put(simpleExcelColumn.columnOrder(), SimpleExcelColumnCreator.builder()
                         .workbook(this.workbook)
@@ -71,25 +72,8 @@ class SimpleExcelWriter<T> {
             for(Map.Entry<Integer, SimpleExcelColumnCreator> el : columnOrderMap.entrySet()) {
                 SimpleExcelColumnCreator creator = el.getValue();
                 Field field = creator.getField();
-                Cell cell = creator.createBodyCell(row.createCell(idx));
-                Object value = el.getValue().getField().get(object);
-
-                if(value == null) {
-                    cell.setCellValue((String) null);
-                }else if(String.class.equals(field.getType())) {
-                    cell.setCellValue(value.toString());
-                }else if(Integer.class.equals(field.getType()) || int.class.equals(field.getType())) {
-                    cell.setCellValue((Integer) value);
-                }else if(Double.class.equals(field.getType()) || double.class.equals(field.getType())) {
-                    cell.setCellValue((Double) value);
-                }else if(Float.class.equals(field.getType()) || float.class.equals(field.getType())) {
-                    cell.setCellValue((Float) value);
-                } else if(Date.class.equals(field.getType())) {
-                    cell.setCellValue((Date) value);
-                }else if(LocalDateTime.class.equals(field.getType()) || OffsetDateTime.class.equals(field.getType())) {
-                    cell.setCellValue((LocalDateTime) value);
-                }
-
+                Object value = field.get(object);
+                creator.createBodyCell(row.createCell(idx), value);
                 idx++;
             }
         } catch (Exception e) {
@@ -101,6 +85,15 @@ class SimpleExcelWriter<T> {
         SXSSFSheet sheet = workbook.createSheet(StringUtils.hasText(sheetName) ? sheetName : "sheet1");
         setHeader(sheet);
         objects.forEach(t -> addRow(sheet, t));
+
+        // footer 넣기
+        int idx = this.colIdx;
+        for(Map.Entry<Integer, SimpleExcelColumnCreator> el : columnOrderMap.entrySet()) {
+            SimpleExcelColumnCreator creator = el.getValue();
+            System.out.println(creator.getSimpleExcelColumn().headerName() + ": " + creator.getSum());
+            idx++;
+        }
+        
         return this.workbook;
     }
 

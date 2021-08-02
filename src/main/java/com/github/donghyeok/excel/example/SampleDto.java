@@ -11,7 +11,7 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 @ToString
 public class SampleDto {
     @SimpleExcelColumn(headerName = "번호", columnOrder = 1, headerFontSize = 17,
-            headerBackgroundColor = IndexedColors.BRIGHT_GREEN)
+            headerBackgroundColor = IndexedColors.BRIGHT_GREEN, includeFooterSum = true)
     Integer no;
     @SimpleExcelColumn(headerName = "업체명", columnOrder = 4, columnWidth = 9000,
             bodyFontSize = 15, bodyAlignment = HorizontalAlignment.LEFT, bodyBackgroundColor = IndexedColors.AQUA)
