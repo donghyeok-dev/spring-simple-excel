@@ -1,6 +1,6 @@
 package com.github.donghyeok.excel;
 
-import com.github.donghyeok.excel.annotation.ExcelColumn;
+import com.github.donghyeok.excel.annotation.SimpleExcelColumn;
 import com.github.donghyeok.excel.exception.ExcelReaderException;
 import com.github.drapostolos.typeparser.TypeParser;
 import org.apache.poi.ss.formula.eval.ErrorEval;
@@ -36,9 +36,9 @@ class SimpleExcelReader<T> {
                     cells.cellIterator().forEachRemaining(cell -> headerNameMap.put(cell.getStringCellValue(), cell.getColumnIndex()));
 
                     ReflectionUtils.doWithFields(tClass, f -> {
-                        final ExcelColumn excelColumn = f.getAnnotation(ExcelColumn.class);
-                        if(excelColumn != null && headerNameMap.containsKey(excelColumn.headerName()))
-                            headerIndexMap.put(headerNameMap.get(excelColumn.headerName()), f);
+                        final SimpleExcelColumn simpleExcelColumn = f.getAnnotation(SimpleExcelColumn.class);
+                        if(simpleExcelColumn != null && headerNameMap.containsKey(simpleExcelColumn.headerName()))
+                            headerIndexMap.put(headerNameMap.get(simpleExcelColumn.headerName()), f);
                     });
                 }else {
                     // body

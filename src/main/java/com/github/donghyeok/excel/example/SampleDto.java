@@ -1,22 +1,26 @@
 package com.github.donghyeok.excel.example;
 
-import com.github.donghyeok.excel.annotation.ExcelColumn;
+import com.github.donghyeok.excel.annotation.SimpleExcelColumn;
 import lombok.*;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
 
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
 public class SampleDto {
-    @ExcelColumn(headerName = "번호", headerOrder = 1)
+    @SimpleExcelColumn(headerName = "번호", columnOrder = 1, headerFontSize = 17,
+            headerBackgroundColor = IndexedColors.BRIGHT_GREEN)
     Integer no;
-    @ExcelColumn(headerName = "업체명", headerOrder = 4, width = 9000)
+    @SimpleExcelColumn(headerName = "업체명", columnOrder = 4, columnWidth = 9000,
+            bodyFontSize = 15, bodyAlignment = HorizontalAlignment.LEFT, bodyBackgroundColor = IndexedColors.AQUA)
     String companyName;
-    @ExcelColumn(headerName = "대표자명", headerOrder = 5)
+    @SimpleExcelColumn(headerName = "대표자명", columnOrder = 5)
     String ceoName;
-    @ExcelColumn(headerName = "이메일", headerOrder = 2, width = 9000)
+    @SimpleExcelColumn(headerName = "이메일", columnOrder = 2, columnWidth = 9000)
     String email;
-    @ExcelColumn(headerName = "연락처", headerOrder = 3, width = 9000)
+    @SimpleExcelColumn(headerName = "연락처", columnOrder = 3, columnWidth = 9000)
     String phone;
     String address;
     String remark;

@@ -1,11 +1,11 @@
 package com.github.donghyeok.excel;
 
-import com.github.donghyeok.excel.annotation.ExcelColumn;
+import com.github.donghyeok.excel.annotation.SimpleExcelColumn;
 import com.github.donghyeok.excel.example.SampleDto;
 import com.github.donghyeok.excel.exception.ExcelWriterException;
 import com.github.drapostolos.typeparser.TypeParser;
-import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.util.ReflectionUtils;
@@ -21,7 +21,7 @@ class SimpleExcelWriter<T> {
     protected final Class<T> tClass;
     protected final TypeParser typeParser;
     Comparator<Integer> comparator;
-    Map<Integer, SimpleExcelColumn> headerOrderMap;
+    Map<Integer, SimpleExcelColumnCreator> columnOrderMap;
     SXSSFWorkbook workbook;
     int rowIdx;
     int colIdx;
@@ -32,69 +32,34 @@ class SimpleExcelWriter<T> {
         this.workbook = new SXSSFWorkbook(100);
         this.workbook.setCompressTempFiles(true);
         this.comparator = Integer::compareTo; // 오름차순, 내림차순: comparator = (s1, s2)->s2.compareTo(s1);
-        this.headerOrderMap = new TreeMap<>(comparator);
+        this.columnOrderMap = new TreeMap<>(comparator);
         this.rowIdx = 0;
         this.colIdx = 0;
 
         ReflectionUtils.doWithFields(SampleDto.class, f -> {
-            final ExcelColumn excelColumn = f.getAnnotation(ExcelColumn.class);
-            if(excelColumn != null) {
+            final SimpleExcelColumn simpleExcelColumn = f.getAnnotation(SimpleExcelColumn.class);
+            if(simpleExcelColumn != null) {
                 ReflectionUtils.makeAccessible(f);
-                this.headerOrderMap.put(excelColumn.headerOrder(), SimpleExcelColumn.builder()
+                this.columnOrderMap.put(simpleExcelColumn.columnOrder(), SimpleExcelColumnCreator.builder()
+                        .workbook(this.workbook)
                         .field(f)
-                        .excelColumn(excelColumn)
+                        .simpleExcelColumn(simpleExcelColumn)
                         .build());
             }
         });
     }
 
-    public CellStyle setHeaderStyle() {
-        Font font = this.workbook.createFont();
-        font.setFontName(HSSFFont.FONT_ARIAL);
-        font.setFontHeightInPoints((short)12);
-        font.setBold(true);
-
-        CellStyle cellStyle = workbook.createCellStyle();
-        cellStyle.setBorderBottom(BorderStyle.THIN);
-        cellStyle.setBorderLeft(BorderStyle.THIN);
-        cellStyle.setBorderRight(BorderStyle.THIN);
-        cellStyle.setBorderTop(BorderStyle.THIN);
-        cellStyle.setFont(font);
-        cellStyle.setAlignment(HorizontalAlignment.CENTER);
-        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        cellStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-        cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        return cellStyle;
-    }
-
     public void setHeader(SXSSFSheet sheet) {
         Row headerRow = sheet.createRow(this.rowIdx++);
         headerRow.setHeight((short)500);
-        CellStyle headerCellStyle = setHeaderStyle();
 
-        int startIdx = this.colIdx;
-        for(Map.Entry<Integer, SimpleExcelColumn> el : headerOrderMap.entrySet()) {
-            Cell cell = headerRow.createCell(startIdx++);
-            cell.setCellValue(el.getValue().getExcelColumn().headerName());
-            cell.setCellStyle(headerCellStyle);
+        int idx = this.colIdx;
+        for(Map.Entry<Integer, SimpleExcelColumnCreator> el : columnOrderMap.entrySet()) {
+            SimpleExcelColumnCreator creator = el.getValue();
+            sheet.setColumnWidth(idx, creator.getSimpleExcelColumn().columnWidth());
+            creator.createHeaderCell(headerRow.createCell(idx));
+            idx++;
         }
-    }
-
-    public CellStyle setBodyStyle(SimpleExcelColumn excelColumn) {
-        Font font = this.workbook.createFont();
-        font.setFontName(HSSFFont.FONT_ARIAL);
-        font.setFontHeightInPoints((short)10);
-        font.setBold(false);
-
-        CellStyle cellStyle = workbook.createCellStyle();
-        cellStyle.setBorderBottom(BorderStyle.THIN);
-        cellStyle.setBorderLeft(BorderStyle.THIN);
-        cellStyle.setBorderRight(BorderStyle.THIN);
-        cellStyle.setBorderTop(BorderStyle.THIN);
-        cellStyle.setFont(font);
-        cellStyle.setAlignment(excelColumn.getExcelColumn().alignment());
-        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        return cellStyle;
     }
 
     public void addRow(SXSSFSheet sheet, T object) {
@@ -103,14 +68,11 @@ class SimpleExcelWriter<T> {
             int idx = this.colIdx;
             row.setHeight((short)500);
 
-            for(Map.Entry<Integer, SimpleExcelColumn> el : headerOrderMap.entrySet()) {
-                SimpleExcelColumn excelColumn = el.getValue();
-                Field field = excelColumn.getField();
-                Object value = field.get(object);
-                sheet.setColumnWidth(idx, excelColumn.getExcelColumn().width());
-                Cell cell = row.createCell(idx++);
-
-                cell.setCellStyle(setBodyStyle(excelColumn));
+            for(Map.Entry<Integer, SimpleExcelColumnCreator> el : columnOrderMap.entrySet()) {
+                SimpleExcelColumnCreator creator = el.getValue();
+                Field field = creator.getField();
+                Cell cell = creator.createBodyCell(row.createCell(idx));
+                Object value = el.getValue().getField().get(object);
 
                 if(value == null) {
                     cell.setCellValue((String) null);
@@ -127,6 +89,8 @@ class SimpleExcelWriter<T> {
                 }else if(LocalDateTime.class.equals(field.getType()) || OffsetDateTime.class.equals(field.getType())) {
                     cell.setCellValue((LocalDateTime) value);
                 }
+
+                idx++;
             }
         } catch (Exception e) {
             throw new ExcelWriterException(e.getMessage(), e);

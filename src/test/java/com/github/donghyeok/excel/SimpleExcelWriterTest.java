@@ -1,6 +1,6 @@
 package com.github.donghyeok.excel;
 
-import com.github.donghyeok.excel.annotation.ExcelColumn;
+import com.github.donghyeok.excel.annotation.SimpleExcelColumn;
 import com.github.donghyeok.excel.example.SampleDto;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,7 +8,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.ReflectionUtils;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -41,28 +40,25 @@ class SimpleExcelWriterTest {
 //        Comparator<Integer> comparator = (s1, s2)->s2.compareTo(s1); // 내림차순
 //        Comparator<Integer> comparator = (s1, s2)->s1.compareTo(s2); // 오름차순
         Comparator<Integer> comparator = Integer::compareTo; // 오름차순
-        Map<Integer, Field> headerOrderMap = new TreeMap<Integer, Field>(comparator);
+        Map<Integer, Field> columnOrderMap = new TreeMap<Integer, Field>(comparator);
 
         ReflectionUtils.doWithFields(SampleDto.class, f -> {
-            final ExcelColumn excelColumn = f.getAnnotation(ExcelColumn.class);
-            if(excelColumn != null) {
-                headerOrderMap.put(excelColumn.headerOrder(), f);
+            final SimpleExcelColumn simpleExcelColumn = f.getAnnotation(SimpleExcelColumn.class);
+            if(simpleExcelColumn != null) {
+                columnOrderMap.put(simpleExcelColumn.columnOrder(), f);
             }
         });
 
         list.forEach(sampleDto -> {
-            headerOrderMap.forEach((integer, field) -> {
+            columnOrderMap.forEach((integer, field) -> {
                 System.out.println(integer + " / " + field);
-
                 try {
                     ReflectionUtils.makeAccessible(field);
                     System.out.println(">> get: " +  field.get(sampleDto));
-//                    Object o = (field.getType()) field.get(sampleDto));
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
             });
         });
-        //list.forEach(System.out::println);
     }
 }
