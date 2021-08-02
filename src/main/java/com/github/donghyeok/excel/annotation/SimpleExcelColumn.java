@@ -44,6 +44,11 @@ public @interface SimpleExcelColumn {
     IndexedColors bodyBackgroundColor() default IndexedColors.WHITE;
     HorizontalAlignment bodyAlignment() default HorizontalAlignment.CENTER;
 
+    /**
+     * 숫자 천단위 표시하려면 #,##0
+     */
+    String bodyFormat() default "";
+
     boolean includeFooterSum() default false;
 
 }

@@ -10,8 +10,8 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
 public class SampleDto {
-    @SimpleExcelColumn(headerName = "번호", columnOrder = 1, headerFontSize = 17,
-            headerBackgroundColor = IndexedColors.BRIGHT_GREEN)
+    @SimpleExcelColumn(headerName = "가격", columnOrder = 1, headerFontSize = 17,
+            headerBackgroundColor = IndexedColors.BRIGHT_GREEN, bodyFormat = "#,##0", includeFooterSum = true)
     Integer no;
     @SimpleExcelColumn(headerName = "업체명", columnOrder = 4, columnWidth = 9000,
             bodyFontSize = 15, bodyAlignment = HorizontalAlignment.LEFT, bodyBackgroundColor = IndexedColors.AQUA)

@@ -4,7 +4,6 @@ import com.github.donghyeok.excel.annotation.SimpleExcelColumn;
 import com.github.donghyeok.excel.example.SampleDto;
 import com.github.donghyeok.excel.exception.ExcelWriterException;
 import com.github.drapostolos.typeparser.TypeParser;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -13,9 +12,11 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Field;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.util.*;
+import java.lang.reflect.Type;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 class SimpleExcelWriter<T> {
     protected final Class<T> tClass;
@@ -39,12 +40,15 @@ class SimpleExcelWriter<T> {
         ReflectionUtils.doWithFields(SampleDto.class, f -> {
             final SimpleExcelColumn simpleExcelColumn = f.getAnnotation(SimpleExcelColumn.class);
             if(simpleExcelColumn != null) {
+
                 ReflectionUtils.makeAccessible(f);
-                this.columnOrderMap.put(simpleExcelColumn.columnOrder(), SimpleExcelColumnCreator.builder()
-                        .workbook(this.workbook)
-                        .field(f)
-                        .simpleExcelColumn(simpleExcelColumn)
-                        .build());
+                Type fieldType = f.getType().getClass();
+                this.columnOrderMap.put(simpleExcelColumn.columnOrder(),
+                        SimpleExcelColumnCreator.builder()
+                                .workbook(this.workbook)
+                                .field(f)
+                                .simpleExcelColumn(simpleExcelColumn)
+                                .build());
             }
         });
     }
@@ -71,25 +75,8 @@ class SimpleExcelWriter<T> {
             for(Map.Entry<Integer, SimpleExcelColumnCreator> el : columnOrderMap.entrySet()) {
                 SimpleExcelColumnCreator creator = el.getValue();
                 Field field = creator.getField();
-                Cell cell = creator.createBodyCell(row.createCell(idx));
-                Object value = el.getValue().getField().get(object);
-
-                if(value == null) {
-                    cell.setCellValue((String) null);
-                }else if(String.class.equals(field.getType())) {
-                    cell.setCellValue(value.toString());
-                }else if(Integer.class.equals(field.getType()) || int.class.equals(field.getType())) {
-                    cell.setCellValue((Integer) value);
-                }else if(Double.class.equals(field.getType()) || double.class.equals(field.getType())) {
-                    cell.setCellValue((Double) value);
-                }else if(Float.class.equals(field.getType()) || float.class.equals(field.getType())) {
-                    cell.setCellValue((Float) value);
-                } else if(Date.class.equals(field.getType())) {
-                    cell.setCellValue((Date) value);
-                }else if(LocalDateTime.class.equals(field.getType()) || OffsetDateTime.class.equals(field.getType())) {
-                    cell.setCellValue((LocalDateTime) value);
-                }
-
+                Object value = field.get(object);
+                creator.createBodyCell(row.createCell(idx), value);
                 idx++;
             }
         } catch (Exception e) {
@@ -101,6 +88,18 @@ class SimpleExcelWriter<T> {
         SXSSFSheet sheet = workbook.createSheet(StringUtils.hasText(sheetName) ? sheetName : "sheet1");
         setHeader(sheet);
         objects.forEach(t -> addRow(sheet, t));
+
+        // footer 넣기
+        Row row = sheet.createRow(this.rowIdx++);
+        int idx = this.colIdx;
+        row.setHeight((short)500);
+
+        for(Map.Entry<Integer, SimpleExcelColumnCreator> el : columnOrderMap.entrySet()) {
+            SimpleExcelColumnCreator creator = el.getValue();
+            creator.createBodyCell(row.createCell(idx), creator.getSum());
+            idx++;
+        }
+        
         return this.workbook;
     }
 
