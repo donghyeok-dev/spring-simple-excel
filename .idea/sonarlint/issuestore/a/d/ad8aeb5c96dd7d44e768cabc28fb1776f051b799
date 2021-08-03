@@ -1,16 +1,13 @@
 
-R
-java:S1128"6Remove this unused import 'java.beans.PropertyEditor'.(€®é?8õÆ‰€°/
-N
-java:S1128"1Remove this unused import 'java.math.BigDecimal'.(êêŠ8‚ßĞï¯/
-X	java:S125)"<This block of commented-out lines of code should be removed.(Áôé8¥×‚ì¯/
-u
-java:S1128"YRemove this unused import 'org.springframework.beans.propertyeditors.CustomNumberEditor'.(»¬ùE8õÆ‰€°/
-U
-java:S1128"8Remove this unused import 'java.time.temporal.Temporal'.(Åƒ€ö8²à°/
-g
-java:S1128"ERemove this unused import 'org.apache.poi.ss.formula.eval.ErrorEval'.(Ò£Ïéüÿÿÿÿ8‚ßĞï¯/
-w
-java:S1128"ZRemove this unused import 'org.springframework.beans.propertyeditors.CustomBooleanEditor'.(µ³¯—8õÆ‰€°/
+J
+java:S1481Z"(Remove this unused "idx" local variable.(…Øå™ùÿÿÿÿ8ê‚¿°/
+U	java:S106]"9Replace this use of System.out or System.err by a logger.(³øùä8™ƒ¿°/
+_
+java:S1128"=Remove this unused import 'org.apache.poi.ss.usermodel.Cell'.(éÊˆüÿÿÿÿ8µ“è»°/
+V
+java:S1128"4Remove this unused import 'java.time.LocalDateTime'.(æÃ§ƒüÿÿÿÿ8åĞè»°/
+X	java:S125""<This block of commented-out lines of code should be removed.(Áôé8´àƒ•°/
 £
-java:S1186~"€Add a nested comment explaining why this method is empty, throw an UnsupportedOperationException or complete the implementation.(Ìñ§±øÿÿÿÿ8ºÑö°/
+java:S1186d"€Add a nested comment explaining why this method is empty, throw an UnsupportedOperationException or complete the implementation.(Ìñ§±øÿÿÿÿ8²¬ »°/
+R
+java:S1128"5Remove this unused import 'java.time.OffsetDateTime'.(ûùˆı8åĞè»°/

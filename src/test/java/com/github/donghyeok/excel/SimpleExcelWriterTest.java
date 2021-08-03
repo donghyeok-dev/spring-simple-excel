@@ -1,18 +1,20 @@
 package com.github.donghyeok.excel;
 
-import com.github.donghyeok.excel.annotation.ExcelColumn;
+import com.github.donghyeok.excel.annotation.SimpleExcelColumn;
 import com.github.donghyeok.excel.example.SampleDto;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.SocketUtils;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.math.BigInteger;
 import java.util.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 class SimpleExcelWriterTest {
     List<SampleDto> list = new ArrayList<>();
@@ -36,33 +38,81 @@ class SimpleExcelWriterTest {
     }
 
     @Test
+    @DisplayName("숫자형 체크")
+    void test_numberic() {
+        assertTrue(isNumberic(int.class));
+        assertTrue(isNumberic(Double.class));
+        assertTrue(isNumberic(Float.class));
+        assertFalse(isNumberic(String.class));
+        assertFalse(isNumberic(BigInteger.class));
+    }
+
+    @FunctionalInterface
+    interface Calculation<T> {
+        T apply(T x, T y);
+    }
+
+    @Test
+    @DisplayName("object sum")
+    void test_object_sum() {
+        Calculation addition;
+
+        Class<?> tClass = Integer.class;
+        Object sum=0;
+        Calculation<Integer> integerAddition = Integer::sum;
+        addition = integerAddition;
+
+        for(int i=0; i<10; i++) {
+            //sum = tClass.cast(a);
+            sum = addition.apply(sum, 10);
+        }
+        System.out.println(sum);
+
+        sum = 0f;
+        Calculation<Float> addition2 = Float::sum;
+        addition = addition2;
+
+        for(int i=0; i<10; i++) {
+            //sum = tClass.cast(a);
+            sum = addition.apply(sum, 10.1f);
+        }
+        System.out.println(sum);
+    }
+
+    protected boolean isNumberic(Class<?> tClass) {
+        return (Integer.class.equals(tClass)
+                || int.class.equals(tClass)
+                || Double.class.equals(tClass)
+                || double.class.equals(tClass)
+                || Float.class.equals(tClass)
+                || float.class.equals(tClass));
+    }
+
+    @Test
     @DisplayName("List Set메서드 테스트")
     void test_list_set() {
 //        Comparator<Integer> comparator = (s1, s2)->s2.compareTo(s1); // 내림차순
 //        Comparator<Integer> comparator = (s1, s2)->s1.compareTo(s2); // 오름차순
         Comparator<Integer> comparator = Integer::compareTo; // 오름차순
-        Map<Integer, Field> headerOrderMap = new TreeMap<Integer, Field>(comparator);
+        Map<Integer, Field> columnOrderMap = new TreeMap<Integer, Field>(comparator);
 
         ReflectionUtils.doWithFields(SampleDto.class, f -> {
-            final ExcelColumn excelColumn = f.getAnnotation(ExcelColumn.class);
-            if(excelColumn != null) {
-                headerOrderMap.put(excelColumn.headerOrder(), f);
+            final SimpleExcelColumn simpleExcelColumn = f.getAnnotation(SimpleExcelColumn.class);
+            if(simpleExcelColumn != null) {
+                columnOrderMap.put(simpleExcelColumn.columnOrder(), f);
             }
         });
 
         list.forEach(sampleDto -> {
-            headerOrderMap.forEach((integer, field) -> {
+            columnOrderMap.forEach((integer, field) -> {
                 System.out.println(integer + " / " + field);
-
                 try {
                     ReflectionUtils.makeAccessible(field);
                     System.out.println(">> get: " +  field.get(sampleDto));
-//                    Object o = (field.getType()) field.get(sampleDto));
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
             });
         });
-        //list.forEach(System.out::println);
     }
 }
