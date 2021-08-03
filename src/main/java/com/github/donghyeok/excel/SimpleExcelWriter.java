@@ -90,10 +90,13 @@ class SimpleExcelWriter<T> {
         objects.forEach(t -> addRow(sheet, t));
 
         // footer 넣기
+        Row row = sheet.createRow(this.rowIdx++);
         int idx = this.colIdx;
+        row.setHeight((short)500);
+
         for(Map.Entry<Integer, SimpleExcelColumnCreator> el : columnOrderMap.entrySet()) {
             SimpleExcelColumnCreator creator = el.getValue();
-            System.out.println(creator.getSimpleExcelColumn().headerName() + ": " + creator.getSum());
+            creator.createBodyCell(row.createCell(idx), creator.getSum());
             idx++;
         }
         

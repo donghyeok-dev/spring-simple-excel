@@ -21,11 +21,11 @@ class SimpleExcelWriterTest {
 
     @BeforeEach
     void setUp() {
-        list.add(SampleDto.builder().no(1).ceoName("대표A").companyName("회사A").email("a@gamil.com").build());
-        list.add(SampleDto.builder().no(2).ceoName("대표B").companyName("회사B").email("b@gamil.com").build());
-        list.add(SampleDto.builder().no(3).ceoName("대표C").companyName("회사C").email("c@gamil.com").build());
-        list.add(SampleDto.builder().no(4).ceoName("대표D").companyName("회사D").email("d@gamil.com").build());
-        list.add(SampleDto.builder().no(5).ceoName("대표E").companyName("회사E").email("e@gamil.com").build());
+        list.add(SampleDto.builder().no(10000).ceoName("대표A").companyName("회사A").email("a@gamil.com").build());
+        list.add(SampleDto.builder().no(20000).ceoName("대표B").companyName("회사B").email("b@gamil.com").build());
+        list.add(SampleDto.builder().no(30000).ceoName("대표C").companyName("회사C").email("c@gamil.com").build());
+        list.add(SampleDto.builder().no(40000).ceoName("대표D").companyName("회사D").email("d@gamil.com").build());
+        list.add(SampleDto.builder().no(50000).ceoName("대표E").companyName("회사E").email("e@gamil.com").build());
     }
 
     @Test

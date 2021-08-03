@@ -5,6 +5,7 @@ import com.github.donghyeok.excel.exception.ExcelWriterException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
@@ -81,6 +82,7 @@ public class SimpleExcelColumnCreator {
         this.bodyCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         this.bodyCellStyle.setFillForegroundColor(this.simpleExcelColumn.bodyBackgroundColor().getIndex());
         this.bodyCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        this.bodyCellStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat(this.simpleExcelColumn.bodyFormat()));
     }
 
     public void createHeaderCell(Cell cell) {
