@@ -4,7 +4,6 @@ import com.github.donghyeok.excel.annotation.SimpleExcelColumn;
 import com.github.donghyeok.excel.example.SampleDto;
 import com.github.donghyeok.excel.exception.ExcelWriterException;
 import com.github.drapostolos.typeparser.TypeParser;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -13,9 +12,11 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Field;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.util.*;
+import java.lang.reflect.Type;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 class SimpleExcelWriter<T> {
     protected final Class<T> tClass;
@@ -41,11 +42,13 @@ class SimpleExcelWriter<T> {
             if(simpleExcelColumn != null) {
 
                 ReflectionUtils.makeAccessible(f);
-                this.columnOrderMap.put(simpleExcelColumn.columnOrder(), SimpleExcelColumnCreator.builder()
-                        .workbook(this.workbook)
-                        .field(f)
-                        .simpleExcelColumn(simpleExcelColumn)
-                        .build());
+                Type fieldType = f.getType().getClass();
+                this.columnOrderMap.put(simpleExcelColumn.columnOrder(),
+                        SimpleExcelColumnCreator.builder()
+                                .workbook(this.workbook)
+                                .field(f)
+                                .simpleExcelColumn(simpleExcelColumn)
+                                .build());
             }
         });
     }
