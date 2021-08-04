@@ -1,15 +1,0 @@
-
-b
-java:S1128
-"ERemove this unused import 'org.apache.poi.xssf.streaming.SXSSFSheet'.(×Õóù8¿£˜¹°/
-Q
-java:S3740"/Provide the parametrized type for this generic.(ìäÍ†şÿÿÿÿ8×ıĞ¾°/
-P
-java:S1905,".Remove this unnecessary cast to "Calculation".(ì½ûÍûÿÿÿÿ8ë¦â¾°/
-U	java:S106i"9Replace this use of System.out or System.err by a logger.(ø Ô¤8•¸‹¿°/
-K
-java:S1905/".Remove this unnecessary cast to "Calculation".(ä§èò8ø—ã¾°/
-J
-java:S19052".Remove this unnecessary cast to "Calculation".(î¶©A8‘æ¾°/
-e
-java:S1128"CRemove this unused import 'org.apache.poi.hssf.usermodel.HSSFFont'.(½‡³ıÿÿÿÿ8š™Ğ¹°/
